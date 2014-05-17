@@ -46,7 +46,6 @@ GREEN="0;33m"
 function s {
     check_help $1
     if _bookmark_name_valid "$@"; then
-        _purge_line "$SDIRS" "$1="
         echo "$1=$(pwd)" >> "$SDIRS"
         echo "baskmark saved!"
     fi

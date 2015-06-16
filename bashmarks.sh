@@ -23,29 +23,32 @@ function s {
     check_help $1
     if _bookmark_name_valid "$@"; then
         echo "$1=$(pwd)" >> "$SDIRS"
-        echo "baskmark saved!"
+        echo "bookmark saved!"
     fi
 }
 
 # jump to bookmark
 function g {
     check_help $1
-    target=$( egrep "^$@=" "$SDIRS" | sed -E "s:^$@=::" )
+    target=$( _get_bookmark $@ )
     if [ -d "$target" ]; then
         cd "$target"
     elif [ ! -n "$target" ]; then
-        echo -e "\033[${RED}WARNING: '${1}' bashmark does not exist\033[00m"
+        echo -e "\033[${RED}WARNING: '${1}' bookmark does not exist\033[00m"
     else
-        echo -e "\033[${RED}WARNING: '${target}' does not exist\033[00m"
+        echo -e "\033[${RED}WARNING: '${target}' bookmark does not exist\033[00m"
     fi
 }
 
 # delete bookmark
 function d {
     check_help $1
-    if _bookmark_name_valid "$@"; then
+    target=$( _get_bookmark "$@")
+    if [ -z "$target" ]; then
+        echo -e "\033[${RED}WARNING: '${1}' bookmark does not exist\033[00m"
+    else
         _purge_line "$SDIRS" "$1="
-        echo "baskmark removed."
+        echo "bookmark removed."
     fi
 }
 
@@ -67,6 +70,11 @@ function l {
     while read line; do
         printf "\033[0;33m%10s\033[0m  %s\n" "${line%%=*}" "${line#*=}" | sed "s:$HOME:~:"
     done < <(cat "$SDIRS" | sort)
+}
+
+
+function _get_bookmark {
+    egrep "^$@=" "$SDIRS" | sed -E "s:^$@=::"
 }
 
 # validate bookmark name
